@@ -204,7 +204,7 @@ cd Spendly-n8n
 
 ## Author
 
-**Badass Aman**
+**Aman Ramesh Raut**
 
 Focuses on agentic AI systems, process automation, and robotics applications.
 
