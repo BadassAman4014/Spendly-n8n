@@ -1,0 +1,668 @@
+{
+  "name": "Spendly",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {
+          "download": true
+        }
+      },
+      "id": "bbb0b680-1eb2-4ba3-a0b1-24cbc68b9e97",
+      "name": "Telegram Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "position": [
+        1680,
+        720
+      ],
+      "webhookId": "4fa0d5df-5d63-4197-a5ba-add4fb4205ba",
+      "typeVersion": 1.2,
+      "credentials": {
+        "telegramApi": {
+          "id": "Wk04O4Ku9gS609rZ",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"relevant\": true,\n  \"expense_record\": {\n    \"date\": \"2025-08-04\",\n    \"amount\": 120000,\n    \"currency\": \"EUR\",\n    \"category\": \"Food\",\n    \"description\": \"Grocery at Penny\"\n  },\n  \"message\": \"\"\n}"
+      },
+      "id": "8fb835c9-8269-40ff-8b90-44ba73237089",
+      "name": "Structured Output Parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "position": [
+        2704,
+        1024
+      ],
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "430e6d22-2ff8-42bf-8f0e-940c0378ad30",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.output.relevant }}",
+              "rightValue": ""
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "64cbf0a2-2933-4857-8d74-a268674b8e19",
+      "name": "Supported scenario?",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        2768,
+        800
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.output.message }}",
+        "additionalFields": {}
+      },
+      "id": "5b74c240-531b-4fef-8f0b-e429b8b30392",
+      "name": "Acknowledge the expense",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        2992,
+        656
+      ],
+      "webhookId": "da2178e4-f6e4-4c45-b8de-b810d65f580a",
+      "typeVersion": 1.2,
+      "credentials": {
+        "telegramApi": {
+          "id": "Wk04O4Ku9gS609rZ",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.output.message }}",
+        "additionalFields": {}
+      },
+      "id": "8f74bdfe-edcb-4141-bc4a-dd59e3c800d9",
+      "name": "Send un-supported scenario message",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        2992,
+        1040
+      ],
+      "webhookId": "4e8e4674-5b05-458b-818a-f46a0254d344",
+      "typeVersion": 1.2,
+      "credentials": {
+        "telegramApi": {
+          "id": "Wk04O4Ku9gS609rZ",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const record = $input.first().json.output.expense_record;\n\nreturn {\n  Date: record.date.toString(),\n  Amount: record.amount,\n  Currency: record.currency,\n  Category: record.category,\n  Description: record.description,\n  MessageID: $('Telegram Trigger').first().json.message.message_id,\n  ChatID: $('Telegram Trigger').first().json.message.chat.id\n};"
+      },
+      "id": "2a993b83-6443-42c4-96b3-1c706d1e8c7c",
+      "name": "Transform the output to expense record",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        2992,
+        848
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1FzTNkE457VHTIpVNaMmQ-OC5HUoKB_cfNAFqAqziYJA",
+          "mode": "list",
+          "cachedResultName": "Expense Tracking",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1FzTNkE457VHTIpVNaMmQ-OC5HUoKB_cfNAFqAqziYJA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1FzTNkE457VHTIpVNaMmQ-OC5HUoKB_cfNAFqAqziYJA/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Date": "={{ $json.Date }}",
+            "Amount": "={{ $json.Amount }}",
+            "Currency": "={{ $json.Currency }}",
+            "Category": "={{ $json.Category }}",
+            "Description": "={{ $json.Description }}",
+            "Message ID": "={{ $json.MessageID }}",
+            "Chat ID": "={{ $json.ChatID }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Amount",
+              "displayName": "Amount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Currency",
+              "displayName": "Currency",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Category",
+              "displayName": "Category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Description",
+              "displayName": "Description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Message ID",
+              "displayName": "Message ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Chat ID",
+              "displayName": "Chat ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "e6cb8ad1-822a-4067-9be1-8d21605a65ad",
+      "name": "Log expense record to google sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        3216,
+        848
+      ],
+      "typeVersion": 4.6,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "97Ts6bAaO45o0SfT",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "=Sorry, I can’t read files or images right now. Just send me a message describing what you spent, and I’ll help you track it! 💬💸",
+        "additionalFields": {}
+      },
+      "id": "07c4d95f-ad2a-4396-b5e8-2c326331e195",
+      "name": "Un-supported message type",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        2080,
+        816
+      ],
+      "webhookId": "4e8e4674-5b05-458b-818a-f46a0254d344",
+      "typeVersion": 1.2,
+      "credentials": {
+        "telegramApi": {
+          "id": "Wk04O4Ku9gS609rZ",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        2224,
+        1024
+      ],
+      "id": "80a447bd-eb4c-4dff-98da-46f1d99509b7",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "SxxKeX5lCXu6l0hn",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dateTimeTool",
+      "typeVersion": 2,
+      "position": [
+        2400,
+        976
+      ],
+      "id": "2e16e8d3-10a8-4ee7-9466-cfb0a003bee2",
+      "name": "Date & Time"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $json.message.voice.file_id }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2032,
+        592
+      ],
+      "id": "f4269399-d39f-411b-8316-45a54c2ce5ed",
+      "name": "Get a file",
+      "webhookId": "fe5b8f9f-255b-4a23-b47a-d450a3f21acd",
+      "credentials": {
+        "telegramApi": {
+          "id": "Wk04O4Ku9gS609rZ",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash"
+        },
+        "inputType": "binary",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        2176,
+        592
+      ],
+      "id": "91bab965-4397-4a32-9891-41e964e0614b",
+      "name": "Transcribe a recording",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "SxxKeX5lCXu6l0hn",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.message.voice }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "object",
+                      "operation": "exists",
+                      "singleValue": true
+                    },
+                    "id": "de4c099d-adcf-4f55-860d-f3bdf50c23cc"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "b302bc6e-3e1f-4c81-a9aa-199e2228652d",
+                    "leftValue": "={{ $json.message.chat }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "object",
+                      "operation": "exists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "2b1decae-91e0-4b74-a0e3-943472e73737",
+                    "leftValue": "={{ $json.message.chat }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "object",
+                      "operation": "notExists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.3,
+      "position": [
+        1888,
+        704
+      ],
+      "id": "1d771c3f-532d-4688-81f5-bd24c9637579",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.message.text }}, {{ $json.content.parts[0].text }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=You are Budget Buddy, a helpful and funny personal finance assistant that helps users track their spending via Telegram chat. The input you receive is a plain text message sent by the user in chat. It may describe a recent expense such as a purchase, bill payment, or money transfer. Your job is to analyze this message and determine whether it contains a valid personal expense. If the content clearly describes a financial transaction (such as a purchase, payment, or transfer), extract the structured details: - date: The date of the transaction. Use {{$now}} if the message mentions “today”,or if no date is provided. Use {{$now}} - 1 Day if the message mentions “yesterday”. Format the date as YYYY-MM-DD only, without time or timezone. - amount: The total amount paid - currency: The currency used (default to “EUR” unless another is clearly shown) - category: Choose the most appropriate category - description: A short summary of what the expense was for Only return an expense if key information like amount and description is present. Do not assume details that are not clearly found in the input. You must always respond with a single valid JSON object in the following format: - \"relevant\": true if the user chat contains a valid expense, false otherwise - \"expense_record\": An object with the extracted expense details (only include if relevant is true, otherwise leave empty for all fields) - \"message\": A friendly, human-like response that confirms the tracked expense (if relevant), or a polite fallback message if not Your tone should be casual, friendly, and supportive. If the content is not clearly an expense (e.g., unclear message , unrelated info), respond with message sorry and politely as user to tell user that you only able to suport expense tracking When classifying the expense, choose one appropriate category from the list below: Food, Transportation, Utilities, Shopping, Entertainment, Health, Education, Housing, Travel, Groceries, Subscriptions, Gifts, Insurance, Investment, Phone & Internet, Bank Fees, Charity, Childcare, Pets, Other If no category fits, use \"Other\". Only return the final JSON object. Do not include explanations or extra text."
+        }
+      },
+      "id": "42f4e035-a84c-4ef6-9fbc-0e5b8a78d7eb",
+      "name": "Spendly Telegram Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        2368,
+        720
+      ],
+      "typeVersion": 2.1,
+      "retryOnFail": false,
+      "waitBetweenTries": 1000
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1FzTNkE457VHTIpVNaMmQ-OC5HUoKB_cfNAFqAqziYJA",
+          "mode": "list",
+          "cachedResultName": "Expense Tracking",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1FzTNkE457VHTIpVNaMmQ-OC5HUoKB_cfNAFqAqziYJA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1FzTNkE457VHTIpVNaMmQ-OC5HUoKB_cfNAFqAqziYJA/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        2544,
+        976
+      ],
+      "id": "d216ea75-47c0-451a-af1d-354ae69fa1c3",
+      "name": "Get row(s) in sheet in Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "97Ts6bAaO45o0SfT",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supported scenario?": {
+      "main": [
+        [
+          {
+            "node": "Acknowledge the expense",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Transform the output to expense record",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send un-supported scenario message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Spendly Telegram Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transform the output to expense record": {
+      "main": [
+        [
+          {
+            "node": "Log expense record to google sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Spendly Telegram Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Date & Time": {
+      "ai_tool": [
+        [
+          {
+            "node": "Spendly Telegram Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a file": {
+      "main": [
+        [
+          {
+            "node": "Transcribe a recording",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Get a file",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Spendly Telegram Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Un-supported message type",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [],
+        [],
+        [],
+        [],
+        []
+      ]
+    },
+    "Transcribe a recording": {
+      "main": [
+        [
+          {
+            "node": "Spendly Telegram Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log expense record to google sheet": {
+      "main": [
+        []
+      ]
+    },
+    "Spendly Telegram Agent": {
+      "main": [
+        [
+          {
+            "node": "Supported scenario?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet in Google Sheets": {
+      "ai_tool": [
+        [
+          {
+            "node": "Spendly Telegram Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "6c404bd6-29cd-4597-8469-3a7c493a0549",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "94ef0d03a8f9acafd74ef53406cf74a6cfa347a763d78e17f9c7ecae5a7331c4"
+  },
+  "id": "fjhGOVC3dauaXHL8",
+  "tags": []
+}
