@@ -63,6 +63,8 @@ Includes routing logic for:
 
 ### High-level Flow
 
+![Spendly Workflow](Images/Workflow.png)
+
 1. **Telegram Trigger** receives updates.
 2. **Switch Node** categorizes messages into:
    - Voice messages
