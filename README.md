@@ -1,5 +1,7 @@
 # 📱 Spendly – AI-Powered Telegram Expense Tracker
 
+![Spendly Workflow](Images/Workflow.png)
+
 A smart, lightweight, conversational expense-tracking system built using **n8n**, **Google Gemini**, and **Google Sheets**.
 
 Spendly lets users log expenses naturally through **Telegram messages or voice notes**, while an AI agent extracts structured financial data and stores it automatically.
@@ -62,8 +64,6 @@ Includes routing logic for:
 ## 🧩 Architecture
 
 ### High-level Flow
-
-![Spendly Workflow](Images/Workflow.png)
 
 1. **Telegram Trigger** receives updates.
 2. **Switch Node** categorizes messages into:
